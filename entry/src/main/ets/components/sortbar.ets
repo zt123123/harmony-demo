@@ -1,16 +1,27 @@
+import { SortItem } from '../common/interface'
+
 @Component
 export default struct SortBar {
+  @State list: SortItem[] = [
+    { id: 1, label: "按支付时间由近及远" },
+    { id: 1, label: "按支付时间由远及近" },
+    { id: 1, label: "按预约时间由近及远" },
+    { id: 1, label: "按预约时间由远及近" },
+  ]
+
   build() {
     Row() {
       Text("按支付时间由进及远").fontSize(14)
-    }.width("100%").height(40).padding(16).bindMenu(this.MyMenu)
+      Image($r("app.media.icon")).width(16).margin({ left: 8 })
+    }.width("100%").padding(16).bindMenu(this.MyMenu)
   }
 
   @Builder
   MyMenu() {
     Menu() {
-      MenuItem({ startIcon: $r("app.media.icon"), content: "菜单选项" })
-      MenuItem({ startIcon: $r("app.media.icon"), content: "菜单选项" })
+      ForEach(this.list, (item: SortItem, index) => {
+        MenuItem({ startIcon: $r("app.media.icon"), content: item.label })
+      })
     }
   }
 }

@@ -16,6 +16,8 @@ struct Index {
   @State orderList: OrderItem[] = []
   @State visible: boolean = true
   @State refreshing: boolean = false
+  @State currentIndex: number = 0
+  private controller: TabsController = new TabsController()
   @State filterList: IFilterItem[] = [
     { title: "待发货", count: 521 },
     { title: "待付款", count: 0 },
@@ -28,14 +30,40 @@ struct Index {
     this.orderList = OrderList.getOrderList()
   }
 
+  @Builder TabBuilder(item: string, index: number) {
+    Column() {
+      Text(item)
+        .fontColor(this.currentIndex === index ? "#d91b1b" : "#aaa")
+        .fontSize(12)
+        .fontWeight(500)
+        .margin({ top: 14})
+      Row()
+        .width(28)
+        .height(2)
+        .margin({ top: 9})
+        .borderRadius(12)
+        .backgroundColor(this.currentIndex === index ? "#d91b1b" : Color.Transparent)
+    }
+    .backgroundColor(Color.White)
+    .width("100%")
+    .height(40)
+    .border({
+      color: "#eee",
+      width: { bottom: 1 },
+      style: {
+        bottom: BorderStyle.Solid
+      }
+    })
+  }
+
   build() {
     Column() {
       NavBar()
       Refresh({ refreshing: $$this.refreshing }) {
         Column() {
           SearchBar()
-          Tabs() {
-            ForEach(this.tabList, (item, index) => {
+          Tabs({ controller: this.controller }) {
+            ForEach(this.tabList, (item: string, index) => {
               TabContent() {
                 Column() {
                   if (index == 0) {
@@ -43,14 +71,19 @@ struct Index {
                       filterList: $filterList,
                       activeIndex: 0
                     })
+                    NoticeBar({ visible: this.visible })
                   }
-                  NoticeBar({ visible: this.visible })
                   SortBar()
                   OrderListWidget({ orderList: $orderList })
                 }.width("100%")
-              }.tabBar(item)
+              }
+              .tabBar(this.TabBuilder(item, index))
             })
-          }.layoutWeight(1)
+          }
+          .barHeight(40)
+          .onChange((index: number) => {
+            this.currentIndex = index
+          })
         }.width("100%")
       }.onRefreshing(() => {
         setTimeout(_ => {
