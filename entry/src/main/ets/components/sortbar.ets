@@ -12,7 +12,7 @@ export default struct SortBar {
   build() {
     Row() {
       Text("按支付时间由进及远").fontSize(14)
-      Image($r("app.media.icon")).width(16).margin({ left: 8 })
+      Image($r("app.media.arrow_down")).width(16).margin({ left: 4 })
     }.width("100%").padding(16).bindMenu(this.MyMenu)
   }
 

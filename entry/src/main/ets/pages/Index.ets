@@ -7,6 +7,8 @@ import SearchBar from '../components/searchbar';
 import SortBar from '../components/sortbar';
 import OrderItem from '../model/OrderItem';
 import OrderList from '../model/OrderList';
+import OrderItemWidget from '../components/orderitem';
+import { PullToRefresh } from '@ohos/pulltorefresh'
 
 
 @Entry
@@ -18,6 +20,8 @@ struct Index {
   @State refreshing: boolean = false
   @State currentIndex: number = 0
   private controller: TabsController = new TabsController()
+  private scroller: Scroller = new Scroller();
+  @State refreshText: string = '';
   @State filterList: IFilterItem[] = [
     { title: "待发货", count: 521 },
     { title: "待付款", count: 0 },
@@ -27,7 +31,11 @@ struct Index {
   ]
 
   aboutToAppear() {
-    this.orderList = OrderList.getOrderList()
+    this.initData()
+  }
+
+  initData() {
+    return this.orderList = OrderList.getOrderList()
   }
 
   @Builder TabBuilder(item: string, index: number) {
@@ -36,11 +44,11 @@ struct Index {
         .fontColor(this.currentIndex === index ? "#d91b1b" : "#aaa")
         .fontSize(12)
         .fontWeight(500)
-        .margin({ top: 14})
+        .margin({ top: 14 })
       Row()
         .width(28)
         .height(2)
-        .margin({ top: 9})
+        .margin({ top: 9 })
         .borderRadius(12)
         .backgroundColor(this.currentIndex === index ? "#d91b1b" : Color.Transparent)
     }
@@ -56,40 +64,81 @@ struct Index {
     })
   }
 
+  @Builder
+  private getListView() {
+    List({ scroller: this.scroller }) {
+      ForEach(this.orderList, (item: OrderItem) => {
+        ListItem() {
+          OrderItemWidget({ item: item })
+        }
+      })
+    }
+    .width("100%").height("100%").edgeEffect(EdgeEffect.None)
+  }
+
   build() {
     Column() {
       NavBar()
-      Refresh({ refreshing: $$this.refreshing }) {
-        Column() {
-          SearchBar()
-          Tabs({ controller: this.controller }) {
-            ForEach(this.tabList, (item: string, index) => {
-              TabContent() {
-                Column() {
-                  if (index == 0) {
-                    FilterBar({
-                      filterList: $filterList,
-                      activeIndex: 0
-                    })
-                    NoticeBar({ visible: this.visible })
-                  }
-                  SortBar()
-                  OrderListWidget({ orderList: $orderList })
-                }.width("100%")
-              }
-              .tabBar(this.TabBuilder(item, index))
-            })
-          }
-          .barHeight(40)
-          .onChange((index: number) => {
-            this.currentIndex = index
+
+      Column() {
+        SearchBar()
+        Tabs({ controller: this.controller }) {
+          ForEach(this.tabList, (item: string, index) => {
+            TabContent() {
+              Column() {
+                if (index == 0) {
+                  FilterBar({
+                    filterList: $filterList,
+                    activeIndex: 0
+                  })
+                  NoticeBar({ visible: this.visible })
+                }
+                SortBar()
+                PullToRefresh({
+                  data: $orderList,
+                  scroller: this.scroller,
+                  customList: () => {
+                    this.getListView();
+                  },
+                  onRefresh: () => {
+                    return new Promise<string>((resolve, reject) => {
+                      setTimeout(() => {
+                        resolve('刷新成功');
+                        this.orderList = this.initData();
+                      }, 1000);
+                    });
+                  },
+                  onLoadMore: () => {
+                    return new Promise<string>((resolve, reject) => {
+                      setTimeout(() => {
+                        resolve('');
+                        this.orderList = this.orderList.concat(new Array(20).fill(new OrderItem({
+                          orderId: 9999,
+                          quantity: 9999,
+                          imgHead: 'https://si.geilicdn.com/pcdecorate1487527478-44fd0000018920369ac10a20e284-unadjust_350_350.jpeg?w=110&h=110&cp=1',
+                          addTime: '2024-03-18 17:11:00',
+                          totalPrice: 9999,
+                          status: 1,
+                          orderDesc: '新增订单描述',
+                          statusDesc: '新增退款描述'
+                        })));
+                      }, 1000);
+                    });
+                  },
+                  customLoad: null,
+                  customRefresh: null,
+                })
+              }.width("100%")
+            }
+            .tabBar(this.TabBuilder(item, index))
           })
-        }.width("100%")
-      }.onRefreshing(() => {
-        setTimeout(_ => {
-          this.refreshing = false
-        }, 1000)
-      })
+        }
+        .barHeight(40)
+        .onChange((index: number) => {
+          this.currentIndex = index
+        })
+      }.width("100%")
+
     }
     .backgroundColor(0xeeeeee)
     .height("100%")

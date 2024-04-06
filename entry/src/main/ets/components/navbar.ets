@@ -9,7 +9,7 @@
 export default struct NavBar {
   build() {
     Row() {
-      Image($r("app.media.icon")).width(18)
+      Image($r("app.media.arrow_left")).width(24)
       Text("订单管理").fancyText(18, '#FFFFFF')
       Text("帮助").fancyText(14, '#FFFFFF')
     }

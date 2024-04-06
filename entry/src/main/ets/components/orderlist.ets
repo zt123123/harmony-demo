@@ -11,6 +11,7 @@ import OrderItem from '../model/OrderItem'
 @Component
 export default struct OrderListWidget {
   @Link orderList: OrderItem[]
+  @Link scroller: any
 
   build() {
     List() {
@@ -80,6 +81,6 @@ export default struct OrderListWidget {
           })
         }
       })
-    }.width("100%").height("100%")
+    }.width("100%").height("100%").edgeEffect(EdgeEffect.None)
   }
 }

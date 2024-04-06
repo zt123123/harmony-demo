@@ -6,6 +6,7 @@ export enum OrderStatus {
   REVIEW
 }
 
+@Observed
 class OrderItem {
   orderId: number
   quantity: number

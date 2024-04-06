@@ -22,8 +22,7 @@ export default struct NoticeBar {
             .fontWeight(FontWeight.Bold)
         }
 
-        Image($r("app.media.icon")).width(16).onClick(_ => {
-          console.log("-------")
+        Image($r("app.media.close")).width(16).onClick(_ => {
           this.visible = false
         })
       }
